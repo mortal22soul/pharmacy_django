@@ -1,18 +1,17 @@
-from django.shortcuts import render
-
-from decimal import Decimal
 from django.db import transaction
 from django.db.models import F, Q
+
 from rest_framework import viewsets, status
-from rest_framework.decorators import action, api_view
+from rest_framework.views import APIView
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import (Pharmacy, Patient, Medicine, PharmacyInventory, PatientPurchase, PatientInteractionLog)
 from .serializers import (PharmacySerializer, PatientSerializer, MedicineSerializer,
                         PharmacyInventorySerializer, PatientPurchaseSerializer,
-                        PatientInteractionLogSerializer)
+                        PatientInteractionLogSerializer, PharmacyNearbySerializer)
 
 from .filters import PharmacyInventoryFilter
 
@@ -110,13 +109,18 @@ def haversine(lat1, lon1, lat2, lon2):
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
     return R * c
 
-from rest_framework.views import APIView
 
 class PharmaciesNearbyView(APIView):
     """
     GET /api/pharmacies/nearby/?lat=...&lng=...&medicine=aspirin (medicine by id or name)
     Returns pharmacies ordered by distance that have stock > 0 for the medicine.
     """
+
+    @extend_schema(
+            responses=PharmacyNearbySerializer(many=True),
+            description="List nearby pharmacies that have a given medicine in stock"
+    )
+
     def get(self, request):
         lat = request.query_params.get('lat')
         lng = request.query_params.get('lng')

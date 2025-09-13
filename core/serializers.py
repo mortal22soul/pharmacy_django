@@ -36,3 +36,13 @@ class PatientInteractionLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = PatientInteractionLog
         fields = '__all__'
+
+class PharmacyNearbySerializer(serializers.Serializer):
+    pharmacy_id = serializers.IntegerField()
+    pharmacy_name = serializers.CharField()
+    address = serializers.CharField()
+    distance_km = serializers.FloatField()
+    stock_quantity = serializers.IntegerField()
+    price = serializers.CharField()   # or DecimalField(max_digits=10, decimal_places=2)
+    medicine_id = serializers.IntegerField()
+    medicine_name = serializers.CharField()
